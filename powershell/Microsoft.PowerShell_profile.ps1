@@ -24,6 +24,8 @@ Remove-Item alias:cat -Force -ErrorAction SilentlyContinue
 function cat { bat @args }
 
 function c { Clear-Host }
+function matrix { rusty-rain --group classic --color green }
+function pipes { pipes-rs }
 New-Item -Path Function:\.. -Value { Set-Location .. } -Force | Out-Null
 New-Item -Path Function:\... -Value { Set-Location ..\.. } -Force | Out-Null
 
