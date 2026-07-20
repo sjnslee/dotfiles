@@ -22,8 +22,8 @@ Remove-Item alias:cat -Force -ErrorAction SilentlyContinue
 function cat { bat @args }
 
 function c { Clear-Host }
-function '..' { Set-Location .. }
-function '...' { Set-Location ..\.. }
+function ${..} { Set-Location .. }
+function ${...} { Set-Location ..\.. }
 
 # --- fzf key bindings (Ctrl+T file search, Ctrl+R history search) ---
 if (Get-Module -ListAvailable -Name PSFzf) {
