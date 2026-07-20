@@ -5,20 +5,48 @@
 #   RIGHT: git branch + status, then time
 #   Switch a shell to it:  STARSHIP_CONFIG=~/.config/starship.experimental.toml exec zsh
 #   Promote when happy:    cp ~/.config/starship.experimental.toml ~/.config/starship.toml
-format = "$username$hostname$directory$character"
+format = "${custom.user_mac}${custom.host_mac}${env_var.win_user}${env_var.win_host}$directory$character"
 right_format = "$git_branch$git_status${custom.cmd_ms}$time"
 add_newline = true
 
 [username]
-show_always = true                     # default only shows for root / over SSH
-style_user = "bold #c9d7e9"            # green
-style_root = "bold red"            # red when root
-format = "[$user]($style)"
+disabled = true
 
 [hostname]
-ssh_only = false                       # default only shows over SSH
-style = "bold #d1a7ce"                      # blue
-format = "[@$hostname]($style) "
+disabled = true
+
+# Real username/hostname are used on mac (whoami/hostname). On Windows the real
+# values are ugly over SSH (e.g. Administrator@DESKTOP-ONKLLQC), so a friendly
+# identity is hardcoded there instead. Colors match the old username/hostname styles.
+[custom.user_mac]
+os = "macos"
+shell = ["sh", "-c"]
+command = "whoami"
+when = true
+style = "bold #c9d7e9"                 # green
+format = "[$output]($style)"
+
+[custom.host_mac]
+os = "macos"
+shell = ["sh", "-c"]
+command = "hostname"
+when = true
+style = "bold #d1a7ce"                 # blue
+format = "[@$output]($style) "
+
+# Windows: env vars set once in the PowerShell profile (no subprocess per
+# prompt, unlike a custom command — spawning powershell.exe to shell out is
+# slow enough to blow starship's command_timeout). Auto-hides on mac since
+# these vars are never set there.
+[env_var.win_user]
+variable = "STARSHIP_WIN_USER"
+style = "bold #c9d7e9"                 # green
+format = "[$env_value]($style)"
+
+[env_var.win_host]
+variable = "STARSHIP_WIN_HOST"
+style = "bold #d1a7ce"                 # blue
+format = "[@$env_value]($style) "
 
 [directory]
 style = "#c9d7e9"                 # blue
