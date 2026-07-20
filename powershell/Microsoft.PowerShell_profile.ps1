@@ -14,9 +14,9 @@ Remove-Item alias:cd -Force -ErrorAction SilentlyContinue
 function cd { z @args }
 
 Remove-Item alias:ls -Force -ErrorAction SilentlyContinue
-function ls { eza --icons @args }
+function ls { eza --icons=always @args }
 
-function ll { eza -lah --icons @args }
+function ll { eza -lah --icons=always @args }
 
 Remove-Item alias:cat -Force -ErrorAction SilentlyContinue
 function cat { bat @args }
