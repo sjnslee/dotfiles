@@ -5,7 +5,9 @@ Invoke-Expression (& { (zoxide init powershell | Out-String) })
 # bun
 $env:PATH = "$env:USERPROFILE\.bun\bin;$env:PATH"
 
-fastfetch
+if (-not [Console]::IsInputRedirected) {
+    fastfetch
+}
 
 # --- aliases translated from .zshrc ---
 Set-Alias -Name vi -Value nvim
