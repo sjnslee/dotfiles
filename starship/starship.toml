@@ -1,0 +1,63 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# EXPERIMENTAL sandbox — MINIMALIST.
+#   LEFT : user @ device  path  >
+#   RIGHT: git branch + status, then time
+#   Switch a shell to it:  STARSHIP_CONFIG=~/.config/starship.experimental.toml exec zsh
+#   Promote when happy:    cp ~/.config/starship.experimental.toml ~/.config/starship.toml
+format = "$username$hostname$directory$character"
+right_format = "$git_branch$git_status${custom.cmd_ms}$time"
+add_newline = true
+
+[username]
+show_always = true                     # default only shows for root / over SSH
+style_user = "bold #c9d7e9"            # green
+style_root = "bold red"            # red when root
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = false                       # default only shows over SSH
+style = "bold #d1a7ce"                      # blue
+format = "[@$hostname]($style) "
+
+[directory]
+style = "#c9d7e9"                 # blue
+truncation_length = 3
+truncate_to_repo = false
+read_only = " ro"
+read_only_style = "#ea6962"
+format = "[$path]($style)[$read_only]($read_only_style)"
+
+[character]
+format = " $symbol "
+success_symbol = "[❯](bold #cccccc)"   # green
+error_symbol   = "[❯](bold #ea6962)"   # red
+
+# --- right side: git + time ---
+[git_branch]
+style = "#d8a657"                      # yellow
+format = "[$branch]($style) "
+
+[git_status]
+style = "#e78a4e"                      # orange
+format = '([\[$all_status$ahead_behind\]]($style) )'
+ahead    = "^"
+behind   = "v"
+diverged = "v^"
+deleted  = "x"
+renamed  = "r"
+
+# Total command time in whole ms (e.g. "2500ms"), fed by the CMD_DURATION_MS env
+# var that the zsh timer hook exports. Custom module because starship's built-in
+# cmd_duration can only render unit chunks (2s500ms), never a flat total.
+[custom.cmd_ms]
+command = 'printf "%sms" "${CMD_DURATION_MS:-0}"'
+when = "true"
+style = "#757575"                      # gray
+format = "[$output]($style) "
+
+[time]
+disabled = false                       # time is off by default
+time_format = "%H:%M:%S"
+style = "#757575"                      # gray
+format = "[$time]($style)"
