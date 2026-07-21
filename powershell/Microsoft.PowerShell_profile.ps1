@@ -6,7 +6,7 @@ $env:COLORTERM = "truecolor"
 
 # Real Windows username/hostname are ugly over SSH (Administrator@DESKTOP-...),
 # so starship.toml displays these instead via env_var modules.
-$env:STARSHIP_WIN_USER = "tsum"
+$env:STARSHIP_WIN_USER = "shane"
 $env:STARSHIP_WIN_HOST = "tsumpc"
 
 Invoke-Expression (&starship init powershell)
