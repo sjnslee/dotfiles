@@ -1,6 +1,15 @@
 return {
   "folke/snacks.nvim",
   opts = {
+    image = {
+      enabled = true,
+      doc = {
+        -- render images inline in markdown/other docs
+        inline = true,
+        -- also show a floating preview near the cursor
+        float = true,
+      },
+    },
     dashboard = {
       preset = {
         header = [[

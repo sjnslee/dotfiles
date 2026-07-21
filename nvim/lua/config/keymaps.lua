@@ -162,3 +162,51 @@ end, { desc = "Toggle colorscheme" })
 
 -- call :Hypersonic: explain regex
 vim.keymap.set("v", "<leader>rg", ":Hypersonic<CR>")
+
+-- ============================================================
+-- ONE-KEY RUN  (F5 or <leader>rr) — runs the current file in a
+-- bottom terminal split. Python uses the project's .venv if
+-- present. Cross-platform: identical on macOS and Windows nvim.
+-- ============================================================
+local _run_buf = nil
+
+local function _find_root(markers, from)
+  local hit = vim.fs.find(markers, { upward = true, path = from })[1]
+  return hit and vim.fn.fnamemodify(hit, ":h") or vim.fn.fnamemodify(from, ":h")
+end
+
+local function _run_current_file()
+  vim.cmd("silent! write")
+  local ft = vim.bo.filetype
+  local file = vim.fn.expand("%:p")
+  local is_win = vim.fn.has("win32") == 1
+  local cmd
+
+  if ft == "python" then
+    local root = _find_root({ ".venv", "pyproject.toml", "requirements.txt", ".git" }, file)
+    local py = is_win and (root .. "\\.venv\\Scripts\\python.exe") or (root .. "/.venv/bin/python")
+    if vim.fn.filereadable(py) == 0 then py = is_win and "python" or "python3" end
+    cmd = { py, file }
+  elseif ft == "lua" then
+    cmd = { "nvim", "-l", file }
+  elseif ft == "sh" or ft == "bash" then
+    cmd = { "bash", file }
+  elseif ft == "javascript" or ft == "typescript" then
+    cmd = { "node", file }
+  else
+    vim.notify("run: no runner for filetype '" .. ft .. "'", vim.log.levels.WARN)
+    return
+  end
+
+  -- reuse a single bottom terminal instead of stacking splits
+  if _run_buf and vim.api.nvim_buf_is_valid(_run_buf) then
+    pcall(vim.api.nvim_buf_delete, _run_buf, { force = true })
+  end
+  vim.cmd("botright new | resize 15")
+  _run_buf = vim.api.nvim_get_current_buf()
+  vim.fn.jobstart(cmd, { term = true })
+  vim.cmd("startinsert")
+end
+
+vim.keymap.set("n", "<F5>", _run_current_file, { desc = "Run current file" })
+vim.keymap.set("n", "<leader>rr", _run_current_file, { desc = "Run current file" })
