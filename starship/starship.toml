@@ -20,7 +20,7 @@ disabled = true
 # identity is hardcoded there instead. Colors match the old username/hostname styles.
 [custom.user_mac]
 os = "macos"
-shell = ["sh", "-c"]
+shell = ["sh"]
 command = "whoami"
 when = true
 style = "bold #c9d7e9"                 # green
@@ -28,7 +28,7 @@ format = "[$output]($style)"
 
 [custom.host_mac]
 os = "macos"
-shell = ["sh", "-c"]
+shell = ["sh"]
 command = "hostname"
 when = true
 style = "bold #d1a7ce"                 # blue
