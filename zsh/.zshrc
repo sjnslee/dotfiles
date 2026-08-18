@@ -3,6 +3,11 @@ ZSH_THEME=""
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source "$ZSH/oh-my-zsh.sh"
 
+# openjdk is keg-only (brew doesn't symlink it), so put it on PATH by hand.
+# Needed by nvim's <F5> runner and by mason's jdtls.
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+
 alias vi='nvim'
 alias rain='terminal-rain --rain-color cyan --lightning-color white'
 alias bonsai='cbonsai --live --time=0.005 --life=40'
@@ -12,8 +17,9 @@ alias fish='asciiquarium'
 alias pipes='pipes.sh'
 alias clock='tty-clock -c -s -t -C 5'
 alias moon='moon-buggy'
-alias dino='termrex/build/termrex'
+alias dino="$HOME/.local/src/termrex/build/termrex"
 alias type='typioca'
+alias ff='fastfetch'
 
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -22,6 +28,7 @@ alias cd='z'
 alias ls="eza --icons"
 alias ll="eza -lah --icons"
 alias cat="bat"
+alias :q="exit"
 
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
@@ -62,4 +69,28 @@ syncosmos() {  # pull everything from tsumpc -> Mac EXCEPT the venv (tar over ss
   mkdir -p ~/code/cosmos-proj
   ssh tsumpc "tar -czf - -C C:/Users/Shane/Code/cosmos-proj --exclude .venv --exclude '*/.venv/*' ." \
     | tar -xzf - -C ~/code/cosmos-proj && echo "synced -> ~/code/cosmos-proj (venv excluded)"
+}
+
+
+
+
+wakepc() {
+    ssh tsum@bada.tailf69127.ts.net "~/scripts/wake-pc.sh"
+
+    echo "you gotta wait up gang"
+
+    until ssh shane@tsumpc exit 2>/dev/null
+    do
+        sleep 3
+    done
+
+    echo "connecting or something like that"
+
+    ssh shane@tsumpc
+}
+
+
+
+shutdownpc() {
+    ssh shane@tsumpc "shutdown /s /t 0"
 }

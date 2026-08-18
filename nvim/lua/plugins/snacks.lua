@@ -1,6 +1,15 @@
 return {
   "folke/snacks.nvim",
   opts = {
+    -- open terminals in a right-hand split instead of a float, so the
+    -- source stays readable beside the shell. Applies to <C-/>,
+    -- <leader>ft and <leader>fT alike.
+    terminal = {
+      win = {
+        position = "right",
+        width = 0.4,
+      },
+    },
     image = {
       enabled = true,
       doc = {

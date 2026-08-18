@@ -193,16 +193,49 @@ local function _run_current_file()
     cmd = { "bash", file }
   elseif ft == "javascript" or ft == "typescript" then
     cmd = { "node", file }
+  elseif ft == "java" then
+    local dir = vim.fn.fnamemodify(file, ":h")
+    local sources = vim.fn.glob(dir .. (is_win and "\\" or "/") .. "*.java", false, true)
+    if #sources > 1 then
+      -- siblings present: compile the whole dir, then run this file's class.
+      -- honour a package decl so -cp lookup uses the fully qualified name.
+      local class = vim.fn.fnamemodify(file, ":t:r")
+      for _, l in ipairs(vim.fn.readfile(file, "", 50)) do
+        local pkg = l:match("^%s*package%s+([%w_.]+)%s*;")
+        if pkg then
+          class = pkg .. "." .. class
+          break
+        end
+      end
+      local out = dir .. (is_win and "\\.build" or "/.build")
+      local quoted = {}
+      for _, src in ipairs(sources) do
+        quoted[#quoted + 1] = '"' .. src .. '"'
+      end
+      local line = string.format(
+        'javac -d "%s" %s && java -cp "%s" %s',
+        out,
+        table.concat(quoted, " "),
+        out,
+        class
+      )
+      cmd = is_win and { "cmd", "/c", line } or { "sh", "-c", line }
+    else
+      -- lone file: JDK 11+ runs the source directly, no javac step
+      cmd = { "java", file }
+    end
   else
     vim.notify("run: no runner for filetype '" .. ft .. "'", vim.log.levels.WARN)
     return
   end
 
-  -- reuse a single bottom terminal instead of stacking splits
+  -- reuse a single terminal instead of stacking splits
   if _run_buf and vim.api.nvim_buf_is_valid(_run_buf) then
     pcall(vim.api.nvim_buf_delete, _run_buf, { force = true })
   end
-  vim.cmd("botright new | resize 15")
+  -- right-hand vertical split, ~40% of the window but never uselessly narrow
+  vim.cmd("botright vnew")
+  vim.cmd("vertical resize " .. math.max(60, math.floor(vim.o.columns * 0.4)))
   _run_buf = vim.api.nvim_get_current_buf()
   vim.fn.jobstart(cmd, { term = true })
   vim.cmd("startinsert")
