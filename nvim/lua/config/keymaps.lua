@@ -182,6 +182,15 @@ local function _run_current_file()
   local is_win = vim.fn.has("win32") == 1
   local cmd
 
+  -- markdown isn't "run", it's viewed: hand it to the OS default app
+  -- (Marked/Typora/browser) instead of opening a pointless terminal split.
+  if ft == "markdown" then
+    local opener = is_win and { "cmd", "/c", "start", "", file } or { "open", file }
+    vim.fn.jobstart(opener, { detach = true })
+    vim.notify("opened " .. vim.fn.fnamemodify(file, ":t") .. " in the default app")
+    return
+  end
+
   if ft == "python" then
     local root = _find_root({ ".venv", "pyproject.toml", "requirements.txt", ".git" }, file)
     local py = is_win and (root .. "\\.venv\\Scripts\\python.exe") or (root .. "/.venv/bin/python")
