@@ -1,0 +1,26 @@
+font-family = "Mononoki Nerd Font"
+font-size = 14
+
+# Mononoki is a thin typeface and Kanagawa Dragon is a deliberately low-contrast
+# palette; thickening the stems restores legibility without changing the font.
+font-thicken = true
+# Mononoki's default leading is tight for reading long files in nvim.
+adjust-cell-height = 12%
+
+theme = Kanagawa Dragon
+
+window-padding-x = 8
+window-padding-y = 8
+
+cursor-style = block
+shell-integration = detect
+
+# Always open new terminals in the home directory (~/) instead of inheriting cwd
+working-directory = home
+
+copy-on-select = clipboard
+
+# Shift+Enter -> ESC+Enter, which Claude Code reads as "insert newline".
+# Plain bytes, so it survives tmux and SSH (unlike the kitty-protocol encoding).
+keybind = shift+enter=text:\x1b\r
+
