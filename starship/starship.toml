@@ -29,7 +29,9 @@ format = "[$output]($style)"
 [custom.host_mac]
 os = "macos"
 shell = ["sh"]
-command = "hostname"
+# `hostname` returns the DHCP-supplied name (e.g. "Mac") when the system
+# HostName is unset; LocalHostName is always the real machine name.
+command = "scutil --get LocalHostName"
 when = true
 style = "bold #d1a7ce"                 # blue
 format = "[@$output]($style) "

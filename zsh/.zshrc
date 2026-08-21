@@ -40,6 +40,9 @@ fastfetch
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# machine-local settings that do not belong in a public repo
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
 # View a tsumpc image. ~/ maps to the Windows home C:/Users/Shane.
 #   sshview  ~/Code/cosmos-proj/attacks/plain_text.png   -> render in terminal (Ghostty, no tmux)
 #   sshview1 ~/Code/cosmos-proj/attacks/plain_text.png   -> popup in Preview
@@ -74,17 +77,24 @@ syncosmos() {  # pull everything from tsumpc -> Mac EXCEPT the venv (tar over ss
 
 
 
+# WAKE_HOST is the always-on box that sends the wake-on-lan packet. It is a
+# private hostname, so it lives in ~/.zshrc.local (untracked) rather than here.
 wakepc() {
-    ssh tsum@bada.tailf69127.ts.net "~/scripts/wake-pc.sh"
+    if [[ -z "$WAKE_HOST" ]]; then
+        echo "wakepc: set WAKE_HOST in ~/.zshrc.local" >&2
+        return 1
+    fi
 
-    echo "you gotta wait up gang"
+    ssh "$WAKE_HOST" "~/scripts/wake-pc.sh"
+
+    echo "waiting"
 
     until ssh shane@tsumpc exit 2>/dev/null
     do
         sleep 3
     done
 
-    echo "connecting or something like that"
+    echo "connecting"
 
     ssh shane@tsumpc
 }
