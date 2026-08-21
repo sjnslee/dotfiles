@@ -1,0 +1,6 @@
+# tsumpc has core.autocrlf=true, which rewrites everything on checkout. Only the
+# PowerShell files actually want CRLF; the rest are read by tools (tmux, sh, nvim)
+# that are happier with LF on every platform.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf

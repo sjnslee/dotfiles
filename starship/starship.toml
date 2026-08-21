@@ -5,7 +5,7 @@
 #   RIGHT: git branch + status, then time
 #   Switch a shell to it:  STARSHIP_CONFIG=~/.config/starship.experimental.toml exec zsh
 #   Promote when happy:    cp ~/.config/starship.experimental.toml ~/.config/starship.toml
-format = "${custom.user_mac}${custom.host_mac}${env_var.win_user}${env_var.win_host}$directory$character"
+format = "${custom.user_mac}${custom.host_mac}${custom.user_linux}${custom.host_linux}${env_var.win_user}${env_var.win_host}$directory$character"
 right_format = "$git_branch$git_status${custom.cmd_ms}$time"
 add_newline = true
 
@@ -32,6 +32,23 @@ shell = ["sh"]
 # `hostname` returns the DHCP-supplied name (e.g. "Mac") when the system
 # HostName is unset; LocalHostName is always the real machine name.
 command = "scutil --get LocalHostName"
+when = true
+style = "bold #d1a7ce"                 # blue
+format = "[@$output]($style) "
+
+# Same idea as user_mac/host_mac, but gated to linux so the two never both fire.
+[custom.user_linux]
+os = "linux"
+shell = ["sh"]
+command = "whoami"
+when = true
+style = "bold #c9d7e9"                 # green
+format = "[$output]($style)"
+
+[custom.host_linux]
+os = "linux"
+shell = ["sh"]
+command = "hostname"
 when = true
 style = "bold #d1a7ce"                 # blue
 format = "[@$output]($style) "
