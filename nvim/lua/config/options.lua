@@ -33,3 +33,34 @@ local function _ensure_jdk_on_path()
   end
 end
 _ensure_jdk_on_path()
+
+-- Make yanking copy to the Mac clipboard when this box is edited over SSH.
+--
+-- OSC 52 (the usual terminal clipboard escape) does NOT work here: Windows ConPTY
+-- strips the sequence before it reaches the Mac terminal. Instead we send each yank
+-- through an SSH reverse tunnel to a pbcopy listener running on the Mac.
+--
+-- Requires (all set up on the Mac side):
+--   * ~/.ssh/config:  RemoteForward 127.0.0.1:52371 127.0.0.1:52371
+--   * a launchd agent listening on 127.0.0.1:52371 -> pbcopy
+--   * clip-send.ps1 next to this file (stdpath config dir)
+--
+-- Sitting at the Windows console directly (no SSH) this is skipped, and LazyVim's
+-- normal unnamedplus + win32yank copies to the Windows clipboard instead. The
+-- win32 check keeps it off the Mac entirely -- an SSH session into the Mac would
+-- otherwise try to shell out to `powershell` on every yank.
+if vim.fn.has("win32") == 1 and vim.env.SSH_CONNECTION then
+  local sender = vim.fs.joinpath(vim.fn.stdpath("config"), "clip-send.ps1")
+
+  vim.api.nvim_create_autocmd("TextYankPost", {
+    group = vim.api.nvim_create_augroup("YankToMacClipboard", { clear = true }),
+    callback = function()
+      -- yank-only: keep deletes/changes (d/c/x) out of the clipboard
+      if vim.v.event.operator ~= "y" then
+        return
+      end
+      local text = table.concat(vim.v.event.regcontents, "\n")
+      vim.system({ "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", sender }, { stdin = text })
+    end,
+  })
+end
