@@ -64,3 +64,14 @@ if vim.fn.has("win32") == 1 and vim.env.SSH_CONNECTION then
     end,
   })
 end
+
+-- Neovim's python3 provider, which molten's remote plugin runs inside. Pin it to
+-- a dedicated venv rather than letting nvim search PATH: `python` and `python3`
+-- resolve to different installs on this box, so whichever one nvim happened to
+-- find would decide whether pynvim was importable. The venv holds pynvim and
+-- jupyter_client and nothing project-specific; kernels live in project venvs.
+-- Absent on Windows, where the check just fails and nvim falls back to PATH.
+local _nvim_python = vim.fn.expand("~/.venvs/nvim/bin/python")
+if vim.fn.executable(_nvim_python) == 1 then
+  vim.g.python3_host_prog = _nvim_python
+end
