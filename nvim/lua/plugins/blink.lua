@@ -28,7 +28,16 @@ return {
           "hide_documentation",
         },
 
+        -- hide returns true when the menu is open, which would swallow the
+        -- keypress; wrapping it discards that so <Esc> always leaves insert
         ["<Esc>"] = {
+          function(cmp)
+            cmp.hide()
+          end,
+          "fallback",
+        },
+
+        ["<C-e>"] = {
           "hide",
           "fallback",
         },
