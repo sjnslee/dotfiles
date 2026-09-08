@@ -41,6 +41,28 @@ local function run_cell()
   vim.fn.MoltenEvaluateRange(cell_bounds())
 end
 
+-- jupyter_client writes a kernel's connection file straight into jupyter's
+-- runtime dir without creating it first, so on a box where no jupyter server
+-- has ever run MoltenInit dies with `[Errno 2] ... kernel-<uuid>.json` and
+-- leaves you with no kernel. The dir is platform-specific and jupyter_core is
+-- the only thing that knows where it is, so ask it rather than hardcoding.
+local function ensure_runtime_dir()
+  local py = vim.g.python3_host_prog or "python3"
+  local out = vim.fn.system({ py, "-c", "import jupyter_core.paths as p; print(p.jupyter_runtime_dir())" })
+  if vim.v.shell_error ~= 0 then
+    return
+  end
+  local dir = vim.trim(out)
+  if dir ~= "" then
+    vim.fn.mkdir(dir, "p")
+  end
+end
+
+local function init_kernel()
+  ensure_runtime_dir()
+  vim.cmd("MoltenInit")
+end
+
 return {
   {
     "GCBallesteros/jupytext.nvim",
@@ -50,6 +72,16 @@ return {
       -- which makes the buffer invalid python and lights up pyright
       style = "percent",
       output_extension = "auto",
+      -- output_extension = "auto" makes jupytext.nvim pass `--to=auto:percent`
+      -- and let the jupytext cli resolve `auto` from metadata.language_info
+      -- .file_extension. colab writes language_info as `{"name": "python"}`
+      -- with no file_extension, so jupytext exits 1 and you get an empty
+      -- buffer. a custom_language_formatting entry is the one path that
+      -- substitutes the real extension itself, so python notebooks never ask
+      -- the cli to guess.
+      custom_language_formatting = {
+        python = { extension = "py", style = "percent", force_ft = "python" },
+      },
     },
     config = function(_, opts)
       -- jupytext.nvim reads metadata.kernelspec unguarded. notebooks written by
@@ -87,7 +119,7 @@ return {
     end,
     keys = {
       { "<leader>m", "", desc = "+molten" },
-      { "<leader>mi", "<cmd>MoltenInit<cr>", desc = "init kernel" },
+      { "<leader>mi", init_kernel, desc = "init kernel" },
       { "<leader>mI", "<cmd>MoltenDeinit<cr>", desc = "stop kernel" },
       { "<leader>mR", "<cmd>MoltenRestart!<cr>", desc = "restart kernel" },
       { "<leader>mc", run_cell, desc = "run cell" },
@@ -103,6 +135,9 @@ return {
       { "<leader>mn", "<cmd>MoltenNext<cr>", desc = "next cell" },
       { "<leader>mp", "<cmd>MoltenPrev<cr>", desc = "prev cell" },
       { "<leader>ms", "<cmd>MoltenExportOutput!<cr>", desc = "save outputs into .ipynb" },
+      -- jupytext hands molten a python buffer with no outputs in it, so a
+      -- notebook saved with results reopens blank until they are read back
+      { "<leader>mS", "<cmd>MoltenImportOutput<cr>", desc = "load outputs from .ipynb" },
     },
   },
 }
