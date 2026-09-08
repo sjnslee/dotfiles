@@ -67,14 +67,6 @@ sshview1() {  # popup in Preview
   scp -q "shane@tsumpc:$src" "$dst" && open "$dst"
 }
 
-# ---- cosmos-proj sync (code only; venv is machine-local, never synced) ----
-syncosmos() {  # pull everything from tsumpc -> Mac EXCEPT the venv (tar over ssh; tsumpc has no rsync)
-  mkdir -p ~/code/cosmos-proj
-  ssh tsumpc "tar -czf - -C C:/Users/Shane/Code/cosmos-proj --exclude .venv --exclude '*/.venv/*' ." \
-    | tar -xzf - -C ~/code/cosmos-proj && echo "synced -> ~/code/cosmos-proj (venv excluded)"
-}
-
-
 
 
 # WAKE_HOST is the always-on box that sends the wake-on-lan packet. It is a
