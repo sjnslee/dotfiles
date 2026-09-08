@@ -17,9 +17,9 @@ alias fish='asciiquarium'
 alias pipes='pipes.sh'
 alias clock='tty-clock -c -s -t -C 5'
 alias moon='moon-buggy'
-alias dino="$HOME/.local/src/termrex/build/termrex"
 alias type='typioca'
 alias ff='fastfetch'
+alias lg='lazygit'
 
 alias ..='cd ..'
 alias ...='cd ../..'

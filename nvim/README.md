@@ -16,11 +16,11 @@ nvim   # lazy.nvim bootstraps itself on first launch
 | --- | --- |
 | `init.lua` | one line: `require("config.lazy")` |
 | `lua/config/lazy.lua` | lazy.nvim bootstrap + LazyVim import |
-| `lua/config/options.lua` | JDK PATH repair, SSH clipboard bridge |
+| `lua/config/options.lua` | JDK PATH repair, SSH clipboard bridge, python3 provider venv |
 | `lua/config/keymaps.lua` | everything below under [Keymaps](#keymaps) |
 | `lua/config/autocmds.lua` | snacks sidebar drag-resize guard |
 | `lua/plugins/*.lua` | one file per plugin or concern |
-| `lazyvim.json` | enabled LazyVim extras (`lang.java`, `lang.python`) |
+| `lazyvim.json` | enabled LazyVim extras (java, python, typescript, tailwind, json, prettier, mini-surround, mini-hipatterns) |
 | `clip-send.ps1` | Windows helper for the clipboard bridge |
 
 ## Plugins
@@ -39,12 +39,18 @@ Each of these has a spec under `lua/plugins/`.
 | [saghen/blink.cmp](https://github.com/saghen/blink.cmp) | completion, rebound to Tab/Enter with no preselect |
 | [karb94/neoscroll.nvim](https://github.com/karb94/neoscroll.nvim) | eased scrolling |
 | [sphamba/smear-cursor.nvim](https://github.com/sphamba/smear-cursor.nvim) | cursor trail |
-| [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | pyright interpreter pinning (see `plugins/python.lua`) |
+| [GCBallesteros/jupytext.nvim](https://github.com/GCBallesteros/jupytext.nvim) | edit `.ipynb` as a `# %%` python buffer |
+| [benlubas/molten-nvim](https://github.com/benlubas/molten-nvim) | run those cells against a jupyter kernel, plots inline |
+| [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) | draw markdown as a document, `<leader>um` to toggle |
+| [folke/noice.nvim](https://github.com/folke/noice.nvim) | drop jdtls' per-keystroke progress messages |
+| [xeluxee/competitest.nvim](https://github.com/xeluxee/competitest.nvim) | competitive programming testcases, `<leader>tt` |
+| [neovim/nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | pyright interpreter pinning, html/css/emmet servers, diagnostic profiles |
 | [Eandrju/cellular-automaton.nvim](https://github.com/Eandrju/cellular-automaton.nvim) | `<leader>lr` / `<leader>ll`, purely for fun |
 
 ### inherited from LazyVim
 
 Installed and left at LazyVim's defaults:
+[SchemaStore.nvim](https://github.com/b0o/SchemaStore.nvim) ·
 [bufferline.nvim](https://github.com/akinsho/bufferline.nvim) ·
 [catppuccin](https://github.com/catppuccin/nvim) ·
 [conform.nvim](https://github.com/stevearc/conform.nvim) ·
@@ -57,9 +63,10 @@ Installed and left at LazyVim's defaults:
 [mason.nvim](https://github.com/mason-org/mason.nvim) ·
 [mason-lspconfig.nvim](https://github.com/mason-org/mason-lspconfig.nvim) ·
 [mini.ai](https://github.com/nvim-mini/mini.ai) ·
+[mini.hipatterns](https://github.com/nvim-mini/mini.hipatterns) ·
 [mini.icons](https://github.com/nvim-mini/mini.icons) ·
 [mini.pairs](https://github.com/nvim-mini/mini.pairs) ·
-[noice.nvim](https://github.com/folke/noice.nvim) ·
+[mini.surround](https://github.com/nvim-mini/mini.surround) ·
 [nui.nvim](https://github.com/MunifTanjim/nui.nvim) ·
 [nvim-jdtls](https://github.com/mfussenegger/nvim-jdtls) ·
 [nvim-lint](https://github.com/mfussenegger/nvim-lint) ·
@@ -77,8 +84,12 @@ Installed and left at LazyVim's defaults:
 
 ### language servers
 
-Installed through mason: `pyright`, `jdtls`, `lua_ls`, plus `ruff`, `stylua` and
-`shfmt` as formatters/linters.
+Installed through mason: `pyright`, `jdtls`, `lua_ls`, `vtsls`, `html`, `cssls`,
+`emmet_language_server`, `tailwindcss` and `jsonls`, plus `ruff`, `stylua`,
+`shfmt` and `prettier` as formatters/linters.
+
+`html`, `cssls` and `emmet_language_server` have no LazyVim extra, so they are
+wired up in `plugins/web.lua`; the rest come from the extras in `lazyvim.json`.
 
 `pyright` picks its interpreter by searching `PATH` for `python3`, which on macOS
 finds Apple's 3.9 with an empty `site-packages`. `plugins/python.lua` resolves it
@@ -100,6 +111,28 @@ directory when there are sibling sources (honouring a `package` declaration),
 otherwise runs the single file directly via JDK 11+ source mode. Markdown is not
 run at all — it opens in the OS default app. Lua, shell, JS and TS each get their
 obvious interpreter. Any other filetype warns instead of guessing.
+
+### notebooks
+
+`.ipynb` opens as a `# %%` python buffer. Cells run against a jupyter kernel,
+output (plots included) is drawn as virtual lines under the cell.
+
+| Key | Action |
+| --- | --- |
+| `<leader>mi` / `<leader>mI` | start / stop the kernel |
+| `<leader>mR` | restart the kernel |
+| `<leader>mc` | run the cell under the cursor |
+| `<leader>ml` | run the current line |
+| `<leader>mv` (visual) | run the selection |
+| `<leader>mr` / `<leader>ma` | rerun the cell / every cell |
+| `<leader>mx` | interrupt |
+| `<leader>mo` / `<leader>mh` / `<leader>me` | show / hide / enter the output window |
+| `<leader>md` | delete the cell's output |
+| `<leader>mn` / `<leader>mp` | next / previous cell |
+| `<leader>ms` / `<leader>mS` | save outputs into / load them back out of the `.ipynb` |
+
+Outputs live in molten, not in the buffer, so a notebook saved with results
+reopens blank until `<leader>mS` reads them back.
 
 ### git
 
@@ -148,11 +181,13 @@ gitsigns' hunk group.
 | `<leader><leader>` | `:source` the current file |
 | `<leader>pv` | netrw |
 | `<leader>lr` / `<leader>ll` | make it rain / game of life |
+| `<leader>tt` | add a competitest testcase |
+| `<leader>uq` | toggle full diagnostics (minimal is the default) |
+| `<leader>um` | toggle markdown rendering |
 
-`<leader>dd`, `<leader>rg`, `<leader>tt` (competitest), `<leader>cp` / `<leader>ci`
-(cord) and `<leader>ff` (telescope) are kept from an older setup; the plugins
-behind them are not currently installed, so those keys are inert until they come
-back.
+`<leader>dd`, `<leader>rg`, `<leader>cp` / `<leader>ci` (cord) and `<leader>ff`
+(telescope) are kept from an older setup; the plugins behind them are not
+currently installed, so those keys are inert until they come back.
 
 ## Cross-platform notes
 
