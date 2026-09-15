@@ -252,3 +252,37 @@ end
 
 vim.keymap.set("n", "<F5>", _run_current_file, { desc = "Run current file" })
 vim.keymap.set("n", "<leader>rr", _run_current_file, { desc = "Run current file" })
+
+-- NOTES --
+-- personal cheatsheet in a float. lives in the config dir so it rides along
+-- with the dotfiles repo to both machines. overrides lazyvim's <leader>? —
+-- <leader>sk still searches keymaps.
+local function _open_notes()
+  local path = vim.fs.joinpath(vim.fn.stdpath("config"), "vim-notes.md")
+  if vim.fn.filereadable(path) == 0 then
+    vim.fn.writefile({ "# vim notes", "" }, path)
+  end
+
+  Snacks.win({
+    file = path,
+    width = 0.75,
+    height = 0.85,
+    border = "rounded",
+    title = " vim notes ",
+    title_pos = "center",
+    wo = { wrap = true, linebreak = true, number = false, signcolumn = "no", conceallevel = 2 },
+    -- snacks opens `file` windows read-only for previews; this is a notebook
+    bo = { modifiable = true, readonly = false },
+    keys = { q = "close" },
+    -- real file buffer, not a scratch: persist edits instead of dropping them
+    on_close = function(self)
+      if vim.api.nvim_buf_is_valid(self.buf) and vim.bo[self.buf].modified then
+        vim.api.nvim_buf_call(self.buf, function()
+          vim.cmd("silent! write")
+        end)
+      end
+    end,
+  })
+end
+
+vim.keymap.set("n", "<leader>?", _open_notes, { desc = "Vim notes" })
