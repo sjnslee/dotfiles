@@ -8,6 +8,9 @@ source "$ZSH/oh-my-zsh.sh"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
 
+export EDITOR=nvim
+export VISUAL=nvim
+
 alias vi='nvim'
 alias rain='terminal-rain --rain-color cyan --lightning-color white'
 alias bonsai='cbonsai --live --time=0.005 --life=40'
@@ -17,7 +20,7 @@ alias fish='asciiquarium'
 alias pipes='pipes.sh'
 alias clock='tty-clock -c -s -t -C 5'
 alias moon='moon-buggy'
-alias type='typioca'
+alias typing='typioca'
 alias ff='fastfetch'
 alias lg='lazygit'
 
@@ -25,14 +28,30 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias c='clear'
 alias cd='z'
-alias ls="eza --icons"
-alias ll="eza -lah --icons"
+alias ls="eza --icons=auto"
+alias ll="eza -lah --icons=auto"
 alias cat="bat"
 alias :q="exit"
 
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
+# flat ms total for starship's cmd_ms module; built-in cmd_duration can only
+# print unit chunks like 2s500ms
+zmodload zsh/datetime
+autoload -Uz add-zsh-hook
+_cmd_timer_start() { _cmd_start=$EPOCHREALTIME }
+_cmd_timer_stop() {
+  if [[ -z $_cmd_start ]]; then
+    unset CMD_DURATION_MS
+    return
+  fi
+  local -i ms=$(( (EPOCHREALTIME - _cmd_start) * 1000 ))
+  export CMD_DURATION_MS=$ms
+  unset _cmd_start
+}
+add-zsh-hook preexec _cmd_timer_start
+add-zsh-hook precmd _cmd_timer_stop
 
 fastfetch
 
@@ -77,18 +96,24 @@ wakepc() {
         return 1
     fi
 
-    ssh "$WAKE_HOST" "~/scripts/wake-pc.sh"
+    ssh "$WAKE_HOST" "~/scripts/wake-pc.sh" || return 1
 
     echo "waiting"
 
-    until ssh shane@tsumpc exit 2>/dev/null
+    # ~3 min: 40 tries of a 3s connect timeout plus 3s sleep
+    local tries=0
+    until ssh -o ConnectTimeout=3 tsumpc exit 2>/dev/null
     do
+        if (( ++tries >= 40 )); then
+            echo "wakepc: tsumpc did not come up" >&2
+            return 1
+        fi
         sleep 3
     done
 
     echo "connecting"
 
-    ssh shane@tsumpc
+    ssh tsumpc
 }
 
 
