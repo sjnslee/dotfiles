@@ -20,6 +20,10 @@ working-directory = home
 
 copy-on-select = clipboard
 
+# left option sends alt, so nvim alt maps (lazyvim <A-j>/<A-k>) work. right
+# option still types special characters
+macos-option-as-alt = left
+
 # Shift+Enter -> ESC+Enter, which Claude Code reads as "insert newline".
 # Plain bytes, so it survives tmux and SSH (unlike the kitty-protocol encoding).
 keybind = shift+enter=text:\x1b\r
