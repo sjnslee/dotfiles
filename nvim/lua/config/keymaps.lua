@@ -19,7 +19,9 @@ vim.keymap.set("n", "<leader><leader>", function()
 end)
 
 -- SEARCH AND REPLACE ALL INSTANCES OF WORD UNDER CURSOR
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+-- <leader>S, not <leader>s: a complete map can't also be a which-key prefix,
+-- and <leader>s fronts lazyvim's whole search group.
+vim.keymap.set("n", "<leader>S", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- DISABLE ARROW KEYS IN NORMAL
 -- vim.keymap.set("n", "<Up>", "<Nop>")
