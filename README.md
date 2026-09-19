@@ -1,5 +1,9 @@
 dotfiles for macOS, Linux, and Windows, symlinked
 
+```sh
+./install.sh   # macOS/linux: symlink everything, backing up files in the way
+```
+
 - terminal utilities config
 - neovim config and plugin list: [nvim/README.md](nvim/README.md).
 

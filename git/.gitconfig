@@ -1,0 +1,15 @@
+[user]
+	name = Shane
+	email = 117777715+sjnslee@users.noreply.github.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true
+[diff]
+	algorithm = histogram
+[merge]
+	conflictstyle = zdiff3
+[rerere]
+	enabled = true
