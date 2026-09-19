@@ -1,6 +1,8 @@
 return {
   {
     "sphamba/smear-cursor.nvim",
+    -- redraw heavy animation lags over ssh, worst through windows conpty
+    cond = vim.env.SSH_CONNECTION == nil,
     opts = {
       stiffness = 0.7,
       trailing_stiffness = 0.4,

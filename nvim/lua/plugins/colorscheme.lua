@@ -4,7 +4,7 @@ return {
     lazy = true,
     priority = 1000,
     opts = {
-      theme = "kanagawa-dragon",
+      theme = "dragon",
     },
   },
 

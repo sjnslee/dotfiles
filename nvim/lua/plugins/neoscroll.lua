@@ -1,5 +1,7 @@
 return {
   "karb94/neoscroll.nvim",
+  -- redraw heavy animation lags over ssh, worst through windows conpty
+  cond = vim.env.SSH_CONNECTION == nil,
   opts = {
     mappings = {
       "<C-u>",

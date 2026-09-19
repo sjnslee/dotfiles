@@ -192,9 +192,17 @@ local function _run_current_file()
   end
 
   if ft == "python" then
-    local root = _find_root({ ".venv", "pyproject.toml", "requirements.txt", ".git" }, file)
-    local py = is_win and (root .. "\\.venv\\Scripts\\python.exe") or (root .. "/.venv/bin/python")
-    if vim.fn.filereadable(py) == 0 then py = is_win and "python" or "python3" end
+    local root = _find_root({ ".venv", "venv", "pyproject.toml", "requirements.txt", ".git" }, file)
+    local py = is_win and "python" or "python3"
+    -- same venv names pyright looks for (plugins/python.lua)
+    for _, venv in ipairs({ ".venv", "venv" }) do
+      local candidate = is_win and (root .. "\\" .. venv .. "\\Scripts\\python.exe")
+        or (root .. "/" .. venv .. "/bin/python")
+      if vim.fn.filereadable(candidate) == 1 then
+        py = candidate
+        break
+      end
+    end
     cmd = { py, file }
   elseif ft == "lua" then
     cmd = { "nvim", "-l", file }

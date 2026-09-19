@@ -1,6 +1,8 @@
 return {
   "folke/snacks.nvim",
   opts = {
+    -- neoscroll.lua owns smooth scrolling; two animators on <C-d> fight
+    scroll = { enabled = false },
     -- open terminals in a right-hand split instead of a float, so the
     -- source stays readable beside the shell. Applies to <C-/>,
     -- <leader>ft and <leader>fT alike.
@@ -48,8 +50,14 @@ return {
     },
   },
   config = function(_, opts)
-    vim.api.nvim_set_hl(0, "SnacksDashboardHeader", {
-      fg = "#ffffff",
+    -- reapply on ColorScheme: switching themes (<leader>cs) clears highlights
+    local function set_header_hl()
+      vim.api.nvim_set_hl(0, "SnacksDashboardHeader", { fg = "#ffffff" })
+    end
+    set_header_hl()
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("snacks_dashboard_header", { clear = true }),
+      callback = set_header_hl,
     })
 
     require("snacks").setup(opts)

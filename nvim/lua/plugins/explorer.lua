@@ -13,6 +13,8 @@ return {
             -- float out of the layout's drag-resize math, which otherwise
             -- blows the sidebar up to full width (its opts.width is 0).
             hidden = { "preview" },
+            -- 75% of the sidebar preset's 40; min_width too, or it clamps back
+            layout = { width = 30, min_width = 30 },
           },
         },
       },
