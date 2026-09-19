@@ -1,10 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# EXPERIMENTAL sandbox — MINIMALIST.
-#   LEFT : user @ device  path  >
-#   RIGHT: git branch + status, then time
-#   Switch a shell to it:  STARSHIP_CONFIG=~/.config/starship.experimental.toml exec zsh
-#   Promote when happy:    cp ~/.config/starship.experimental.toml ~/.config/starship.toml
+# left: user@host path >
+# right: git branch and status, command time, clock
 format = "${custom.user_mac}${custom.host_mac}${custom.user_linux}${custom.host_linux}${env_var.win_user}${env_var.win_host}$directory$character"
 right_format = "$git_branch$git_status${custom.cmd_ms}$time"
 add_newline = true
@@ -68,7 +65,7 @@ style = "bold #d1a7ce"                 # blue
 format = "[@$env_value]($style) "
 
 [directory]
-style = "#c9d7e9"                 # blue
+style = "#c9d7e9"                 # pale blue
 truncation_length = 3
 truncate_to_repo = false
 read_only = " ro"
@@ -77,7 +74,7 @@ format = "[$path]($style)[$read_only]($read_only_style)"
 
 [character]
 format = " $symbol "
-success_symbol = "[❯](bold #cccccc)"   # green
+success_symbol = "[❯](bold #cccccc)"   # light gray
 error_symbol   = "[❯](bold #ea6962)"   # red
 
 # --- right side: git + time ---
