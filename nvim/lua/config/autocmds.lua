@@ -1,35 +1,6 @@
--- Autocmds are automatically loaded on the VeryLazy event
--- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
---
--- Add any additional autocmds here
--- with `vim.api.nvim_create_autocmd`
---
--- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
--- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
-
 -- ============================================================
 -- Guard: snacks sidebar explodes to full width on drag-resize
 -- while a `preview = "main"` preview is open.
---
--- snacks/layout.lua:104-109 sets `win.layout = false` for any
--- `relative = "win"` float, which excludes it from the layout's
--- box sizing -- so its `opts.width`/`opts.height` stay at the 0
--- sentinel ("fill parent") while the real window is full size.
--- The WinResized handler (layout.lua:140-150) does NOT skip those
--- windows: it computes `width_diff = actual - opts.width`, i.e.
--- `159 - 0`, and then does
--- `nvim_win_set_width(root, root_width + 159)`.
--- The 40-col sidebar takes the whole screen.
---
--- Just above that loop (layout.lua:132-135) there is a clean path:
--- if the root's screenpos changed, snacks does a full `self:update()`
--- and returns, never reaching the buggy arithmetic. We register first
--- (VeryLazy, before any picker layout exists) and invalidate
--- `screenpos`, which forces that path.
---
--- Deliberately does NOT touch opts.width/height: those are the float's
--- real sizing inputs, so overwriting them makes the preview render at a
--- stale size and flicker as it is corrected.
 -- ============================================================
 vim.api.nvim_create_autocmd("WinResized", {
   group = vim.api.nvim_create_augroup("snacks_layout_resize_guard", { clear = true }),
@@ -50,5 +21,32 @@ vim.api.nvim_create_autocmd("WinResized", {
         end
       end
     end
+  end,
+})
+
+-- ============================================================
+-- allows using `:q` to quit nvim if only remaining window is an explorer
+-- ============================================================
+vim.api.nvim_create_autocmd("WinClosed", {
+  group = vim.api.nvim_create_augroup("quit_with_explorer", { clear = true }),
+  callback = function()
+    if #vim.api.nvim_list_tabpages() > 1 then
+      return
+    end
+    vim.schedule(function()
+      local explorer_open = false
+      for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        if vim.api.nvim_win_get_config(win).relative == "" then
+          if vim.w[win].snacks_layout then
+            explorer_open = true
+          else
+            return
+          end
+        end
+      end
+      if explorer_open then
+        vim.cmd.quitall()
+      end
+    end)
   end,
 })
