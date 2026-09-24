@@ -1,7 +1,8 @@
-dotfiles for macOS, Linux, and Windows, symlinked
+symlinked dotfiles for macOS, Linux, and Windows
 
 ```sh
-./install.sh   # macOS/linux: symlink everything, backing up files in the way
+git clone https://github.com/sjnslee/dotfiles ~/dotfiles
+~/dotfiles/install.sh   # macOS/linux: sets up symlink, backs up other files
 ```
 
 - terminal utilities config
