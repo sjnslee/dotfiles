@@ -210,6 +210,9 @@ local function _run_current_file()
     cmd = { "nvim", "-l", file }
   elseif ft == "sh" or ft == "bash" then
     cmd = { "bash", file }
+  elseif ft == "matlab" or ft == "octave" then
+    -- --persist drops into the repl afterwards so `;`-silenced vars can be inspected
+    cmd = { "octave", "--no-gui", "--quiet", "--persist", file }
   elseif ft == "javascript" or ft == "typescript" then
     cmd = { "node", file }
   elseif ft == "java" then
