@@ -3,10 +3,13 @@ ZSH_THEME=""
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source "$ZSH/oh-my-zsh.sh"
 
-# openjdk is keg-only (brew doesn't symlink it), so put it on PATH by hand.
-# Needed by nvim's <F5> runner and by mason's jdtls.
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+# openjdk on PATH, if installed
+_jdk="${HOMEBREW_PREFIX:-/opt/homebrew}/opt/openjdk"
+if [[ -d $_jdk/libexec/openjdk.jdk ]]; then
+  export PATH="$_jdk/bin:$PATH"
+  export JAVA_HOME="$_jdk/libexec/openjdk.jdk/Contents/Home"
+fi
+unset _jdk
 
 export EDITOR=nvim
 export VISUAL=nvim
@@ -36,8 +39,7 @@ alias :q="exit"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
-# flat ms total for starship's cmd_ms module; built-in cmd_duration can only
-# print unit chunks like 2s500ms
+# command time in ms for starship's cmd_ms
 zmodload zsh/datetime
 autoload -Uz add-zsh-hook
 _cmd_timer_start() { _cmd_start=$EPOCHREALTIME }
@@ -53,43 +55,39 @@ _cmd_timer_stop() {
 add-zsh-hook preexec _cmd_timer_start
 add-zsh-hook precmd _cmd_timer_stop
 
-fastfetch
+# skip in tmux panes
+[[ -z $TMUX ]] && command -v fastfetch >/dev/null && fastfetch
 
-. "$HOME/.local/bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+command -v fzf >/dev/null && source <(fzf --zsh)
 
-# machine-local settings that do not belong in a public repo
+# machine-local settings
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
-# View a tsumpc image. ~/ maps to the Windows home C:/Users/Shane.
-#   sshview  ~/Code/cosmos-proj/attacks/plain_text.png   -> render in terminal (Ghostty, no tmux)
-#   sshview1 ~/Code/cosmos-proj/attacks/plain_text.png   -> popup in Preview
+# view a tsumpc image: sshview in terminal, sshview1 in preview
 _sshview_resolve() {
   local src="${1//\\//}"                              # backslashes -> /
   case "$src" in
-    [A-Za-z]:/*) ;;                                   # absolute drive path
-    "$HOME"/*)  src="C:/Users/Shane/${src#$HOME/}" ;; # zsh-expanded ~/
+    [A-Za-z]:/*) ;;                                   # drive path
+    "$HOME"/*)  src="C:/Users/Shane/${src#$HOME/}" ;; # expanded ~/
     '~/'*)      src="C:/Users/Shane/${src#\~/}" ;;    # quoted ~/
     '~')        src="C:/Users/Shane" ;;
-    *)          src="C:/Users/Shane/$src" ;;          # bare -> home
+    *)          src="C:/Users/Shane/$src" ;;          # relative -> home
   esac
   print -r -- "$src"
 }
-sshview() {   # render in the terminal (Ghostty, not tmux)
+sshview() {
   local src win; src="$(_sshview_resolve "$1")"; win="${src//\//\\}"
-  /usr/bin/ssh shane@tsumpc "cmd /c type \"$win\"" | /opt/homebrew/bin/kitten icat
+  /usr/bin/ssh shane@tsumpc "cmd /c type \"$win\"" | kitten icat
 }
-sshview1() {  # popup in Preview
+sshview1() {
   local src; src="$(_sshview_resolve "$1")"
   local dst="/tmp/${src:t}"
   scp -q "shane@tsumpc:$src" "$dst" && open "$dst"
 }
 
-
-
-# WAKE_HOST is the always-on box that sends the wake-on-lan packet. It is a
-# private hostname, so it lives in ~/.zshrc.local (untracked) rather than here.
+# wake tsumpc through WAKE_HOST, then ssh in
 wakepc() {
     if [[ -z "$WAKE_HOST" ]]; then
         echo "wakepc: set WAKE_HOST in ~/.zshrc.local" >&2
@@ -100,7 +98,7 @@ wakepc() {
 
     echo "waiting"
 
-    # ~3 min: 40 tries of a 3s connect timeout plus 3s sleep
+    # ~3 min timeout
     local tries=0
     until ssh -o ConnectTimeout=3 tsumpc exit 2>/dev/null
     do
@@ -116,8 +114,8 @@ wakepc() {
     ssh tsumpc
 }
 
-
-
 shutdownpc() {
     ssh shane@tsumpc "shutdown /s /t 0"
 }
+
+fastfetch
