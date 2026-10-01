@@ -185,9 +185,9 @@ gitsigns' hunk group.
 | `<leader>uq` | toggle full diagnostics (minimal is the default) |
 | `<leader>um` | toggle markdown rendering |
 
-`<leader>dd`, `<leader>rg`, `<leader>cp` / `<leader>ci` (cord) and `<leader>ff`
-(telescope) are kept from an older setup; the plugins behind them are not
-currently installed, so those keys are inert until they come back.
+`<leader>dd`, `<leader>rg` and `<leader>cp` / `<leader>ci` (cord) are kept from
+an older setup; the plugins behind them are not currently installed, so those
+keys are inert until they come back.
 
 ## Cross-platform notes
 

@@ -1,48 +1,28 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
---
---
-
 local opts = { noremap = true, silent = true }
 
--- ENTER NETRW
+-- netrw
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
--- MOVE BLOCKS OF TEXT IN VISUAL MODE
+-- move selection up/down
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 
--- SOURCE FILE
+-- source file
 vim.keymap.set("n", "<leader><leader>", function()
   vim.cmd("so")
 end)
 
--- SEARCH AND REPLACE ALL INSTANCES OF WORD UNDER CURSOR
--- <leader>S, not <leader>s: a complete map can't also be a which-key prefix,
--- and <leader>s fronts lazyvim's whole search group.
+-- replace word under cursor
 vim.keymap.set("n", "<leader>S", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
--- DISABLE ARROW KEYS IN NORMAL
--- vim.keymap.set("n", "<Up>", "<Nop>")
--- vim.keymap.set("n", "<Down>", "<Nop>")
--- vim.keymap.set("n", "<Left>", "<Nop>")
--- vim.keymap.set("n", "<Right>", "<Nop>")
-
--- DISABLE ARROW KEYS IN INSERT
--- vim.keymap.set("i", "<Up>", "<Nop>")
--- vim.keymap.set("i", "<Down>", "<Nop>")
--- vim.keymap.set("i", "<Left>", "<Nop>")
--- vim.keymap.set("i", "<Right>", "<Nop>")
-
--- GAME OF LIFE AND RAIN ANIMATION --
+-- cellular automaton
 vim.keymap.set("n", "<leader>lr", "<cmd>CellularAutomaton make_it_rain<CR>")
 vim.keymap.set("n", "<leader>ll", "<cmd>CellularAutomaton game_of_life<CR>")
 
--- COMPETITEST --
+-- competitest
 vim.keymap.set("n", "<leader>tt", ":CompetiTest add_testcase<CR>")
 
--- CORD --
+-- cord
 vim.keymap.set("n", "<leader>cp", function()
   require("cord.api.command").toggle_presence()
 end)
@@ -50,23 +30,17 @@ vim.keymap.set("n", "<leader>ci", function()
   require("cord.api.command").toggle_idle_force()
 end)
 
--- NEOGEN for javadocs --
+-- neogen docstring
 vim.keymap.set("n", "<Leader>dd", ":lua require('neogen').generate()<CR>", opts)
 
--- TELESCOPE --
-vim.keymap.set("n", "<leader>ff", function()
-  require("telescope.builtin").find_files()
-end, {})
-
--- VIRTUAL TEXT TOGGLE --
+-- toggle virtual text
 vim.keymap.set("", "<leader>vt", ":VirtualTextToggle<CR>", { noremap = true, silent = true })
 
--- WHICH KEYS --
+-- which-key
 local status_ok, wk = pcall(require, "which-key")
 if status_ok then
   wk.add({
     { "<leader>f", group = "file" },
-    { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find File", mode = "n" },
     { "<leader>w", proxy = "<c-w>", group = "windows" },
     {
       "<leader>b",
@@ -83,61 +57,39 @@ if status_ok then
   })
 end
 
--- tabs --
-vim.keymap.set("n", "<leader>1", function()
-  require("bufferline").go_to(1, true)
-end, opts)
-vim.keymap.set("n", "<leader>2", function()
-  require("bufferline").go_to(2, true)
-end, opts)
-vim.keymap.set("n", "<leader>3", function()
-  require("bufferline").go_to(3, true)
-end, opts)
-vim.keymap.set("n", "<leader>4", function()
-  require("bufferline").go_to(4, true)
-end, opts)
-vim.keymap.set("n", "<leader>5", function()
-  require("bufferline").go_to(5, true)
-end, opts)
-vim.keymap.set("n", "<leader>6", function()
-  require("bufferline").go_to(6, true)
-end, opts)
-vim.keymap.set("n", "<leader>7", function()
-  require("bufferline").go_to(7, true)
-end, opts)
-vim.keymap.set("n", "<leader>8", function()
-  require("bufferline").go_to(8, true)
-end, opts)
-vim.keymap.set("n", "<leader>9", function()
-  require("bufferline").go_to(9, true)
-end, opts)
+-- go to buffer n, 0 for last
+for i = 1, 9 do
+  vim.keymap.set("n", "<leader>" .. i, function()
+    require("bufferline").go_to(i, true)
+  end, opts)
+end
 vim.keymap.set("n", "<leader>0", function()
   require("bufferline").go_to(-1, true)
 end, opts)
 
--- Navigate through buffers in order
+-- cycle buffers
 vim.keymap.set("n", "<leader>.", ":BufferLineCycleNext<CR>", opts)
 vim.keymap.set("n", "<leader>,", ":BufferLineCyclePrev<CR>", opts)
 
--- Close current buffer
+-- close buffer
 vim.keymap.set("n", "<leader>ww", ":bd<CR>", opts)
 
--- duplicate line + comment first line
+-- duplicate line, comment original
 vim.keymap.set("n", "ycc", "yygccp", { remap = true })
 
--- search within visual area only
+-- search within selection
 vim.keymap.set("x", "/", "<Esc>/\\%V")
 
--- keep cursor in place when joining lines
+-- join lines, keep cursor
 vim.keymap.set("n", "J", "mzJ`z:delmarks z<cr>")
 
--- enable copy and past from system clipboard
+-- paste from system clipboard
 vim.api.nvim_set_keymap("", "<D-v>", "+p<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("!", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 
--- Function to prompt for find/replace in visual mode
+-- find/replace in selection
 local function ReplaceInVisualSelection()
   local s_start = vim.fn.getpos("'<")
   local s_end = vim.fn.getpos("'>")
@@ -151,10 +103,9 @@ local function ReplaceInVisualSelection()
   vim.cmd(cmd)
 end
 
--- Remap to search and replace within visual selection
 vim.keymap.set("v", "<leader>r", ReplaceInVisualSelection, { noremap = true, silent = true })
 
--- TOGGLE COLORSCHEME --
+-- toggle colorscheme
 local _themes = { "kanagawa-dragon", "seoul256-light" }
 local _theme_idx = 1
 vim.keymap.set("n", "<leader>cs", function()
@@ -162,14 +113,10 @@ vim.keymap.set("n", "<leader>cs", function()
   vim.cmd.colorscheme(_themes[_theme_idx])
 end, { desc = "Toggle colorscheme" })
 
--- call :Hypersonic: explain regex
+-- explain regex
 vim.keymap.set("v", "<leader>rg", ":Hypersonic<CR>")
 
--- ============================================================
--- ONE-KEY RUN  (F5 or <leader>rr) — runs the current file in a
--- bottom terminal split. Python uses the project's .venv if
--- present. Cross-platform: identical on macOS and Windows nvim.
--- ============================================================
+-- run current file in a right split
 local _run_buf = nil
 
 local function _find_root(markers, from)
@@ -184,8 +131,7 @@ local function _run_current_file()
   local is_win = vim.fn.has("win32") == 1
   local cmd
 
-  -- markdown isn't "run", it's viewed: hand it to the OS default app
-  -- (Marked/Typora/browser) instead of opening a pointless terminal split.
+  -- markdown opens in default app
   if ft == "markdown" then
     local opener = is_win and { "cmd", "/c", "start", "", file } or { "open", file }
     vim.fn.jobstart(opener, { detach = true })
@@ -196,7 +142,7 @@ local function _run_current_file()
   if ft == "python" then
     local root = _find_root({ ".venv", "venv", "pyproject.toml", "requirements.txt", ".git" }, file)
     local py = is_win and "python" or "python3"
-    -- same venv names pyright looks for (plugins/python.lua)
+    -- project venv if present
     for _, venv in ipairs({ ".venv", "venv" }) do
       local candidate = is_win and (root .. "\\" .. venv .. "\\Scripts\\python.exe")
         or (root .. "/" .. venv .. "/bin/python")
@@ -211,7 +157,7 @@ local function _run_current_file()
   elseif ft == "sh" or ft == "bash" then
     cmd = { "bash", file }
   elseif ft == "matlab" or ft == "octave" then
-    -- --persist drops into the repl afterwards so `;`-silenced vars can be inspected
+    -- --persist keeps repl open after run
     cmd = { "octave", "--no-gui", "--quiet", "--persist", file }
   elseif ft == "javascript" or ft == "typescript" then
     cmd = { "node", file }
@@ -219,8 +165,7 @@ local function _run_current_file()
     local dir = vim.fn.fnamemodify(file, ":h")
     local sources = vim.fn.glob(dir .. (is_win and "\\" or "/") .. "*.java", false, true)
     if #sources > 1 then
-      -- siblings present: compile the whole dir, then run this file's class.
-      -- honour a package decl so -cp lookup uses the fully qualified name.
+      -- compile dir, run class by qualified name
       local class = vim.fn.fnamemodify(file, ":t:r")
       for _, l in ipairs(vim.fn.readfile(file, "", 50)) do
         local pkg = l:match("^%s*package%s+([%w_.]+)%s*;")
@@ -243,7 +188,7 @@ local function _run_current_file()
       )
       cmd = is_win and { "cmd", "/c", line } or { "sh", "-c", line }
     else
-      -- lone file: JDK 11+ runs the source directly, no javac step
+      -- single file: run source directly
       cmd = { "java", file }
     end
   else
@@ -251,11 +196,11 @@ local function _run_current_file()
     return
   end
 
-  -- reuse a single terminal instead of stacking splits
+  -- replace previous run terminal
   if _run_buf and vim.api.nvim_buf_is_valid(_run_buf) then
     pcall(vim.api.nvim_buf_delete, _run_buf, { force = true })
   end
-  -- right-hand vertical split, ~40% of the window but never uselessly narrow
+  -- 40% width, min 60 cols
   vim.cmd("botright vnew")
   vim.cmd("vertical resize " .. math.max(60, math.floor(vim.o.columns * 0.4)))
   _run_buf = vim.api.nvim_get_current_buf()
@@ -266,10 +211,7 @@ end
 vim.keymap.set("n", "<F5>", _run_current_file, { desc = "Run current file" })
 vim.keymap.set("n", "<leader>rr", _run_current_file, { desc = "Run current file" })
 
--- NOTES --
--- personal cheatsheet in a float. lives in the config dir so it rides along
--- with the dotfiles repo to both machines. overrides lazyvim's <leader>? —
--- <leader>sk still searches keymaps.
+-- open vim-notes.md in a float
 local function _open_notes()
   local path = vim.fs.joinpath(vim.fn.stdpath("config"), "vim-notes.md")
   if vim.fn.filereadable(path) == 0 then
@@ -284,10 +226,9 @@ local function _open_notes()
     title = " vim notes ",
     title_pos = "center",
     wo = { wrap = true, linebreak = true, number = false, signcolumn = "no", conceallevel = 2 },
-    -- snacks opens `file` windows read-only for previews; this is a notebook
     bo = { modifiable = true, readonly = false },
     keys = { q = "close" },
-    -- real file buffer, not a scratch: persist edits instead of dropping them
+    -- save on close
     on_close = function(self)
       if vim.api.nvim_buf_is_valid(self.buf) and vim.bo[self.buf].modified then
         vim.api.nvim_buf_call(self.buf, function()
