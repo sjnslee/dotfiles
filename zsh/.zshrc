@@ -117,3 +117,5 @@ wakepc() {
 shutdownpc() {
     ssh shane@tsumpc "shutdown /s /t 0"
 }
+
+fastfetch
