@@ -55,9 +55,6 @@ _cmd_timer_stop() {
 add-zsh-hook preexec _cmd_timer_start
 add-zsh-hook precmd _cmd_timer_stop
 
-# skip in tmux panes
-[[ -z $TMUX ]] && command -v fastfetch >/dev/null && fastfetch
-
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 command -v fzf >/dev/null && source <(fzf --zsh)
@@ -118,4 +115,4 @@ shutdownpc() {
     ssh shane@tsumpc "shutdown /s /t 0"
 }
 
-fastfetch
+command -v fastfetch >/dev/null && fastfetch
